@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"filestore-server/meta"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"filestore-server/meta"
 	"filestore-server/util"
 )
 
@@ -46,6 +47,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer newFile.Close()
+
 		fileMeta.FileSize, err = io.Copy(newFile, file)
 
 		if err != nil {
@@ -53,11 +55,9 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		newFile.Seek(0, 0)
-
-		fileMeta.FileSha1 = util.Sha1(make([]byte, fileMeta.FileSize))
+		fileMeta.FileSha1 = util.FileSha1(newFile)
 
 		newFile.Seek(0, 0)
-
 		meta.FileMetas[fileMeta.FileSha1] = fileMeta
 
 		http.Redirect(w, r, "/file/upload/suc", http.StatusFound)
@@ -66,4 +66,19 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 func UploadSucHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "Upload file success")
+}
+
+
+func GetFileMetaHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	fileHash := r.Form["fileHash"][0]
+	fileMeta := meta.GetFileMeta(fileHash)
+	data, err := json.Marshal(fileMeta)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(data)
+
 }
