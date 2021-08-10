@@ -16,3 +16,6 @@
 
 # goland
 .idea/
+
+# upload files
+./files
