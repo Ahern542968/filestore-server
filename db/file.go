@@ -31,3 +31,39 @@ func OnFileUploadFinished(filehash string, filename string, filesize int64, file
 	}
 	return false
 }
+
+
+type Table struct {
+	FileSha1 sql.NullString
+	FileName sql.NullString
+	FileSize sql.NullInt64
+	FileAddr sql.NullString
+}
+
+
+func GetFileMeta(fileHash string)(*Table, error) {
+	stmt, err := mydb.DBConn().Prepare(
+		"select `file_sha1`,`file_name`,`file_size`,`file_addr` from " +
+			"`file` where `file_sha1`=? and `status`=1 limit 1",
+	)
+	if err != nil {
+		fmt.Println("failed to prepare statement, err:"+err.Error())
+		return nil, err
+	}
+	defer func(stmt *sql.Stmt) {
+		_ = stmt.Close()
+	}(stmt)
+
+	ftable := Table{}
+	err = stmt.QueryRow(fileHash).Scan(&ftable.FileSha1, &ftable.FileName, &ftable.FileSize, &ftable.FileAddr)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	return &ftable, nil
+}
+
+
