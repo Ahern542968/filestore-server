@@ -13,7 +13,6 @@ import (
 	"filestore-server/util"
 )
 
-// UploadHandler ： 处理文件上传
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		// 返回上传html页面
@@ -57,8 +56,8 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		newFile.Seek(0, 0)
 		fileMeta.FileSha1 = util.FileSha1(newFile)
 
-		newFile.Seek(0, 0)
-		meta.FileMetas[fileMeta.FileSha1] = fileMeta
+		//meta.FileMetas[fileMeta.FileSha1] = fileMeta
+		_ = meta.UpdateFileMeta(fileMeta)
 
 		http.Redirect(w, r, "/file/upload/suc", http.StatusFound)
 	}

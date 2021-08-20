@@ -1,9 +1,10 @@
 package main
 
 import (
-	"filestore-server/handler"
 	"fmt"
 	"net/http"
+
+	"filestore-server/handler"
 )
 
 func main() {

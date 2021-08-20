@@ -1,5 +1,7 @@
 package meta
 
+import "filestore-server/db"
+
 type FileMeta struct {
 	FileSha1 string
 	FileName string
@@ -14,8 +16,9 @@ func init() {
 	FileMetas = make(map[string]FileMeta)
 }
 
-func UpdateFileMeta(fmeta FileMeta) {
-	FileMetas[fmeta.FileSha1] = fmeta
+func UpdateFileMeta(fmeta FileMeta) bool {
+	//FileMetas[fmeta.FileSha1] = fmeta
+	return db.OnFileUploadFinished(fmeta.FileSha1, fmeta.FileName, fmeta.FileSize, fmeta.Location)
 }
 
 func GetFileMeta(fileSha1 string) FileMeta {
