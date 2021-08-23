@@ -2,9 +2,19 @@ package db
 
 import (
 	"filestore-server/db/mysql"
-
 	"fmt"
 )
+
+
+type User struct {
+	Username     string
+	Email        string
+	Phone        string
+	SignupAt     string
+	LastActiveAt string
+	Status       int
+}
+
 
 func UserSignup(username string, password string) bool {
 	stmt, err := mysql.DBConn().Prepare(
@@ -70,4 +80,21 @@ func UpdateToken(username string, token string) bool {
 		return false
 	}
 	return true
+}
+
+
+func GetUserInfo(username string) (*User, error) {
+	user := User{}
+	stmt, err := mysql.DBConn().Prepare(
+		"select `user_name`, `signup_at` from `user` where `user_name`=? limit 1")
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(username).Scan(&user.Username, &user.SignupAt)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
